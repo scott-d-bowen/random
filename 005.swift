@@ -1,3 +1,13 @@
+//  main.swift
+//  RandomRandomRandom
+//
+//  Created by Scott D. Bowen
+
+import Foundation
+import BigInt
+import Compression
+
+
 date_start = Date()
 
 DispatchQueue.concurrentPerform(iterations: 10240) { indexGCD in
