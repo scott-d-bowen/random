@@ -10,8 +10,8 @@ import Compression
 
 date_start = Date()
 
-DispatchQueue.concurrentPerform(iterations: 10240) { indexGCD in
-    
+// DispatchQueue.concurrentPerform(iterations: 10240) { indexGCD in
+for _ in 0..<10240 {
     let bigNum = BigUInt.randomInteger(lessThan: BigUInt(256).power(65536))
     let bytes  = bigNum.serialize().toArray(type: UInt8.self)
     var stats: [[UInt8]] = Array(repeating: Array(repeating: 0x00, count: 256), count: 256)
@@ -33,7 +33,10 @@ DispatchQueue.concurrentPerform(iterations: 10240) { indexGCD in
     for iterator in 0..<joined.count {
         statsOnTheStats[Int(joined[iterator])] += 1
     }
-    print(statsOnTheStats)
+    for c in 0...8 {
+        print(statsOnTheStats[c], terminator: ";       ")
+    }
+    print()
 }
 
 print("\(-date_start.timeIntervalSinceNow) seconds")
