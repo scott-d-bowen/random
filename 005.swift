@@ -16,7 +16,7 @@ DispatchQueue.concurrentPerform(iterations: 1024) { indexGCD in
         stats[iter].sort(by: >)
     }
     // print(stats)
-    var joined = Array(stats.joined() )
+    let joined = Array(stats.joined() )
     // print(joined.sorted() )
 
     var statsOnTheStats = Array(repeating: 0x00, count: 256)
