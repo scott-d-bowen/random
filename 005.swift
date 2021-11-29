@@ -1,6 +1,6 @@
 date_start = Date()
 
-DispatchQueue.concurrentPerform(iterations: 1024) { indexGCD in
+DispatchQueue.concurrentPerform(iterations: 10240) { indexGCD in
     
     let bigNum = BigUInt.randomInteger(lessThan: BigUInt(256).power(65536))
     let bytes  = bigNum.serialize().toArray(type: UInt8.self)
