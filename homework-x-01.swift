@@ -1,6 +1,6 @@
 //  main.swift
 //  R4: Make Difficult
-//  'Mark IX.C'
+//  'Mark IX.D'
 //  Created by Scott Bowen
 
 import Foundation
@@ -70,9 +70,11 @@ DispatchQueue.concurrentPerform(iterations: THREAD_COUNT, execute: { indexGCD in
                 }
             }
             if (VIPs_Small.count >= 1) {
-                VIPs_Small.insert(UInt8(VIPs_Small.count-1), at: 0)
+                // If the count is 1 then only use the next value
+                VIPs_Small.insert(UInt8(VIPs_Small.count), at: 0)
                 VIPs.append(contentsOf: VIPs_Small)
             } else {
+                // Otherwise append 0 to indicate that certain work is not required
                 VIPs.append(0x00)
             }
         }
