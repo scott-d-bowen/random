@@ -1,6 +1,6 @@
 //  main.swift
 //  R4: Make Difficult
-//  'Mark IX.B'
+//  'Mark IX.C'
 //  Created by Scott Bowen
 
 import Foundation
@@ -8,11 +8,12 @@ import BigInt
 import Compression
 
 let DIFFICULTY = 144    // Warning Use: ~161 to 186 only!
+let THREAD_COUNT = 64  // Use 4-256 (or more if you have the RAM)
 
 print("Hello, World!")
 
 print("Init Random Data.......")
-let bigNum  = BigUInt.randomInteger(withExactWidth: 8*32768*256*8)
+let bigNum  = BigUInt.randomInteger(withExactWidth: THREAD_COUNT*32768*256*8)
 let bigData = bigNum.serialize().toArray(type: UInt8.self).chunked(into: 256)
 print("bigData.count:", bigData.count)
 print("RNG CMPL [OK]")
@@ -20,7 +21,7 @@ print("RNG CMPL [OK]")
 var date_start = Date()
 print(date_start)
 
-DispatchQueue.concurrentPerform(iterations: 8, execute: { indexGCD in
+DispatchQueue.concurrentPerform(iterations: THREAD_COUNT, execute: { indexGCD in
     var bulkStats: [UInt8] = [ ]
 
     var difficultCount = 0
