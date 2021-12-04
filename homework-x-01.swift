@@ -1,19 +1,23 @@
 //  main.swift
 //  R4: Make Difficult
-//  'Mark IX.D'
+//  'Mark IX.E'
 //  Created by Scott Bowen
 
 import Foundation
 import BigInt
 import Compression
 
-let DIFFICULTY = 144    // Warning Use: ~161 to 186 only!
-let THREAD_COUNT = 64  // Use 4-256 (or more if you have the RAM)
+let DIFFICULTY = 127            // Warning Use: ~161 to 186 only!
+let THREAD_COUNT = 8         // Use 4-256 (or more if you have the RAM)
+let MACRO_BLOCK_SIZE = 2*1024*1024/256
+print("DIFFICULTY      :", DIFFICULTY)
+print("THREAD_COUNT    :", THREAD_COUNT)
+print("MACRO_BLOCK_SIZE:", MACRO_BLOCK_SIZE)
 
 print("Hello, World!")
 
 print("Init Random Data.......")
-let bigNum  = BigUInt.randomInteger(withExactWidth: THREAD_COUNT*32768*256*8)
+let bigNum  = BigUInt.randomInteger(withExactWidth: THREAD_COUNT*MACRO_BLOCK_SIZE*256*8)
 let bigData = bigNum.serialize().toArray(type: UInt8.self).chunked(into: 256)
 print("bigData.count:", bigData.count)
 print("RNG CMPL [OK]")
@@ -27,12 +31,13 @@ DispatchQueue.concurrentPerform(iterations: THREAD_COUNT, execute: { indexGCD in
     var difficultCount = 0
     var VIPs: [UInt8] = [ ]
 
-    for _8MB_LOOP_ in 0..<32768 {
+    for _1MB_LOOP_ in 0..<MACRO_BLOCK_SIZE {
         // let bigNum = BigUInt.randomInteger(withExactWidth: 256*8)
         // bigData.subdata(in: (8*1024*1024*indexGCD)..<(8*1024*1024*indexGCD+(8*1024*1024)))
         var data: [UInt8] = [ ]
-        data.append(contentsOf: bigData[indexGCD * 32768 + _8MB_LOOP_])
-        // print("data.count:", data.count)
+        data.append(contentsOf: bigData[indexGCD * MACRO_BLOCK_SIZE + _1MB_LOOP_])
+        // print(" *: data.count   :", data.count)
+        // print(" *: bigData.count:", bigData.count)
         
         var stats: [UInt8] = Array(repeating: 0x00, count: 256)
         // var dataUInt8: [UInt8] = [ ]
@@ -81,8 +86,8 @@ DispatchQueue.concurrentPerform(iterations: THREAD_COUNT, execute: { indexGCD in
         stats.sort()
         bulkStats.append(contentsOf: stats)
     }
-    print()
-    print()
+    // print()
+    // print()
     print("difficultCount:", difficultCount)
 
     let compVIPs = try! NSData(data: Data(fromArray: VIPs)).compressed(using: .lzfse)
@@ -103,9 +108,9 @@ print("fact160.bits:", fact160.bitWidth)
 
 print()
 
-print("\(-date_start.timeIntervalSinceNow)")
+print("\(-date_start.timeIntervalSinceNow) seconds.")
 date_start = Date()
 print(date_start)
-print()
+// print()
 print("Goodbye.")
 sleep(24*60*60)
