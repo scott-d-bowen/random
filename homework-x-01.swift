@@ -1,14 +1,14 @@
 //  main.swift
 //  R4: Make Difficult
-//  'Mark IX.K'
+//  'Mark IX.L'
 //  Created by Scott Bowen
 
 import Foundation
 import BigInt
 import Compression
 
-let DIFFICULTY = 127         // Warning Use: ~161 to 186 only!
-let THREAD_COUNT = 16        // Use 4-256 (or more if you have the RAM)
+let DIFFICULTY = 127          // Warning Use: ~161 to 186 only!
+let THREAD_COUNT = 60*16     // Use 4-256 (or more if you have the RAM)
 let MACRO_BLOCK_SIZE = 1*1440*1024/256
 print("DIFFICULTY      :", DIFFICULTY)
 print("THREAD_COUNT    :", THREAD_COUNT)
@@ -130,6 +130,9 @@ print("fact96.bits:", fact96.bitWidth)
 
 let fact70 = factorial(70)
 print("fact70.bits:", fact70.bitWidth)
+
+let fact68 = factorial(68)
+print("fact68.bits:", fact68.bitWidth)
 
 let base6pow256 = BigUInt(6).power(256)
 print("base6pow256:", base6pow256.bitWidth, base6pow256)
