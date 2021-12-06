@@ -20,7 +20,7 @@ print(date_start)
 
 DispatchQueue.concurrentPerform(iterations: 1, execute: { indexGCD in
     var bulkLZMA: [UInt8] = [ ]         // Check compression type far below!
-    // TODO: var bulkStatsX
+    var bulkStatsX: [UInt8] = [ ]
 
     for o1 in 0..<bigData.count/1 {
         
@@ -55,14 +55,16 @@ DispatchQueue.concurrentPerform(iterations: 1, execute: { indexGCD in
             sum += Int(statsX[x])
         }
         
-        print()
-        print(statsX.count, sum, statsX.sorted().reversed() )
+        bulkStatsX.append(contentsOf: statsX.sorted().reversed() ) // I think...
+        
+        // OFF: print()
+        // print(statsX.count, sum, statsX.sorted().reversed() )
         
         let X7A = SDBX7__IN_PROGRESS__(pFreqStats: statsX)
-        print("X7A:", X7A.bitWidth)
+        // OK: "X7A: 1684" = print("X7A:", X7A.bitWidth)
         
         // OFF:
-        sleep(2)
+        // sleep(2)
         
         bytesLZMA.sort()
         // bytesLZFSE.sort()
@@ -74,8 +76,9 @@ DispatchQueue.concurrentPerform(iterations: 1, execute: { indexGCD in
 
     let compD = try! NSData(data: Data(fromArray: bulkLZMA)).compressed(using: .lzfse)
     print(compD.length, "< 147456") // , bulkLZMA.count)
-    // let compM = try NSData(data: Data(fromArray: bulkLZFSE)).compressed(using: .lzfse)
-    // print(compM.length, bulkLZMA.count )
+    
+    let compSX = try! NSData(data: Data(fromArray: bulkStatsX)).compressed(using: .lzfse)
+    print(compSX.length * 8, "< SX") // , bulkStatsX.count)
 })
 
 print()
