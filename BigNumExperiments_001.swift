@@ -26,7 +26,7 @@ func gogogo(THRESHOLD: Int) {
                 coordinateW = UInt16(w)
                 coordinateX = UInt8(x)
                 print()
-                print("======== For THRESHOLD: \(lastTHRESHOLD.count) ========")
+                print("======== For THRESHOLD: \(THRESHOLD) ========")
                 print(coordinateW, coordinateX, lastTHRESHOLD.count)
                 break
             }
