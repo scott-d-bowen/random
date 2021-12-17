@@ -11,7 +11,7 @@ import BigInt
 print("Hello, World!")
 
 INIT_FACTORIALS()
-let randomData = BigUInt.randomInteger(withExactWidth: 1*1024*1024*8).serialize()
+// Wrong scope: let randomData = BigUInt.randomInteger(withExactWidth: 1*1024*1024*8).serialize()
 
 let date_start = Date()
 
@@ -21,6 +21,7 @@ var BULK_VOLU: Data = Data()
 
 func tryPackedBits() {
     
+    let randomData = BigUInt.randomInteger(withExactWidth: 1*1024*1024*8).serialize()
     let randomU8__ = randomData.toArray(type: UInt8.self).chunked(into: 256)
     
     for w in 0..<randomU8__.count {
@@ -38,21 +39,27 @@ func tryPackedBits() {
         // OFF: print(remainingValues.count, 256 - remainingValues.count)
         
         let usedValueCount = 256 - remainingValues.count
-        let calibratedBigNum = factorial(UInt32(256 + usedValueCount)) / factorial(UInt32(usedValueCount))
-        print("Calibrated :,", calibratedBigNum.bitWidth, 256 + usedValueCount, usedValueCount)
+        let calibratedBigNum = factorial(UInt32(256 + remainingValues.count)) / factorial(UInt32(remainingValues.count))
+        print("Calibrated :,", calibratedBigNum.bitWidth, 256 + remainingValues.count, remainingValues.count)
         
-        let testArray: [UInt8] = Array(UInt8(usedValueCount)...0xFF)
-        //print(testArray.count, testArray)
+        var speculativeTestingArray: Set<UInt8> = Set(UInt8(remainingValues.count)...0xFF)
+        // print(speculativeTestingArray.count, speculativeTestingArray)
         // sleep(3)
         
         for x in 0..<randomU8__[w].count {
-            var mul: BigUInt = BigUInt(1)
-            if (x < testArray.count) {
-                mul = BigUInt(testArray[x])
+            // var mul: BigUInt = BigUInt(1)
+            if let val = speculativeTestingArray.remove(UInt8(x)) {
+                if let mul = BigUInt(exactly: UInt32(val) + 1) {
+                    // print(speculativeTestingArray.count, speculativeTestingArray)
+                    outputBigN = outputBigN * mul + outputBigN
+                } else {
+                    let mul: BigUInt = 256
+                    outputBigN = outputBigN * mul + outputBigN
+                }
             } else {
-                mul = 256
+                let mul: BigUInt = 256
+                outputBigN = outputBigN * mul + outputBigN
             }
-            outputBigN = outputBigN * mul + BigUInt(randomU8__[w][x])
         }
         outputBigN -= 1
         // OFF: print(outputBigN.bitWidth)
@@ -68,7 +75,7 @@ func tryPackedBits() {
         BULK_DATA.append(outputBigN.serialize() )
         
         LENGTHS.append(UInt16(outputBigN.bitWidth / 8) - 1)
-        print("Packed Bits:,", outputBigN.bitWidth, calibratedBigNum.bitWidth == outputBigN.bitWidth ? true : false)
+        print("Packed Bits:,", outputBigN.bitWidth, calibratedBigNum.bitWidth <= outputBigN.bitWidth ? true : false)
         // sleep(1)
         
     } // END: FOR LOOP[w]
@@ -85,7 +92,7 @@ let FILEX_URL = URL(fileURLWithPath: "/Users/sdb/TESTING/NEW/FADB-SDBX.data")
 func createFileX() {
     let data = BULK_DATA
     try! Data(data).write(to: FILEX_URL)
-    print("FADB.data created?")
+    print("FADB-SDBX.data created?")
 }
 createFileX()
 
@@ -106,7 +113,7 @@ let FILEY_URL = URL(fileURLWithPath: "/Users/sdb/TESTING/NEW/FADB-LENGTHS.data")
 func createFileY() {
     let data = compTest
     try! Data(data).write(to: FILEY_URL)
-    print("FADB.data created?")
+    print("FADB-LENGTHS.data created?")
 }
 createFileY()
 
@@ -122,7 +129,7 @@ let FILEZ_URL = URL(fileURLWithPath: "/Users/sdb/TESTING/NEW/FADB-VOLUMES.data")
 func createFileZ() {
     let data = compTest
     try! Data(data).write(to: FILEZ_URL)
-    print("FADB.data created?")
+    print("FADB-VOLUMES.data created?")
 }
 createFileZ()
 
