@@ -21,8 +21,14 @@ var BULK_VOLU: Data = Data()
 
 func tryPackedBits() {
     
-    let randomData = BigUInt.randomInteger(withExactWidth: 1*1024*1024*8).serialize()
+    var randomData: Data = Data()
+    if BULK_DATA.isEmpty {
+        randomData = BigUInt.randomInteger(withExactWidth: 1*256*1024*8).serialize()
+    } else {
+        randomData = BULK_DATA
+    }
     let randomU8__ = randomData.toArray(type: UInt8.self).chunked(into: 256)
+    BULK_DATA.removeAll(keepingCapacity: true)
     
     for w in 0..<randomU8__.count {
         
@@ -40,7 +46,7 @@ func tryPackedBits() {
         
         let usedValueCount = 256 - remainingValues.count
         let calibratedBigNum = factorial(UInt32(256 + remainingValues.count)) / factorial(UInt32(remainingValues.count))
-        print("Calibrated :,", calibratedBigNum.bitWidth, 256 + remainingValues.count, remainingValues.count)
+        // OFF: print("Calibrated :,", calibratedBigNum.bitWidth, 256 + remainingValues.count, remainingValues.count)
         
         var speculativeTestingArray: Set<UInt8> = Set(UInt8(remainingValues.count)...0xFF)
         // print(speculativeTestingArray.count, speculativeTestingArray)
@@ -51,14 +57,14 @@ func tryPackedBits() {
             if let val = speculativeTestingArray.remove(UInt8(x)) {
                 if let mul = BigUInt(exactly: UInt32(val) + 1) {
                     // print(speculativeTestingArray.count, speculativeTestingArray)
-                    outputBigN = outputBigN * mul + outputBigN
+                    outputBigN = outputBigN * mul + BigUInt(UInt32.random(in: UInt32(0)..<UInt32(x+1)))
                 } else {
                     let mul: BigUInt = 256
-                    outputBigN = outputBigN * mul + outputBigN
+                    outputBigN = outputBigN * mul + BigUInt(UInt32.random(in: UInt32(0)..<UInt32(x+1)))
                 }
             } else {
                 let mul: BigUInt = 256
-                outputBigN = outputBigN * mul + outputBigN
+                outputBigN = outputBigN * mul + BigUInt(UInt32.random(in: UInt32(0)..<UInt32(x+1)))
             }
         }
         outputBigN -= 1
@@ -72,17 +78,20 @@ func tryPackedBits() {
                 BULK_DATA.append(0x00)
             }
         } */
+        // BULK_DATA.append(Data(try! NSData(data: outputBigN.serialize() ).compressed(using: .lzma)))
         BULK_DATA.append(outputBigN.serialize() )
         
         LENGTHS.append(UInt16(outputBigN.bitWidth / 8) - 1)
-        print("Packed Bits:,", outputBigN.bitWidth, calibratedBigNum.bitWidth <= outputBigN.bitWidth ? true : false)
+        // OFF: print("Packed Bits:,", outputBigN.bitWidth, calibratedBigNum.bitWidth <= outputBigN.bitWidth ? true : false)
         // sleep(1)
         
     } // END: FOR LOOP[w]
     
+    print("BULK_DATA SIZE:", BULK_DATA.count)
+    
 } // END: tryPackedBits()
 
-for _ in 1...16 {
+for _ in 1...128 {
     tryPackedBits()
 }
 
@@ -99,39 +108,40 @@ createFileX()
 print("\(-date_start.timeIntervalSinceNow) seconds.")
 print()
 
-var compTest = NSData()
+var compLENG = NSData()
+var compVOLU = NSData()
 
 func compressionTest() {
-    compTest = try! NSData(data: Data(fromArray: LENGTHS)).compressed(using: .lzfse)
-    print(compTest.count - 12, LENGTHS.count)
-    compTest = try! NSData(data: Data(fromArray: LENGTHS)).compressed(using: .lzma)
-    print(compTest.count - 32, LENGTHS.count)
+    compLENG = try! NSData(data: Data(fromArray: LENGTHS)).compressed(using: .lzfse)
+    print(compLENG.count - 12, LENGTHS.count)
+    compLENG = try! NSData(data: Data(fromArray: LENGTHS)).compressed(using: .lzma) // .compressed(using: .lzma)
+    print(compLENG.count - 32, LENGTHS.count)
 }
 compressionTest()
 
 let FILEY_URL = URL(fileURLWithPath: "/Users/sdb/TESTING/NEW/FADB-LENGTHS.data")
 func createFileY() {
-    let data = compTest
+    let data = compLENG
     try! Data(data).write(to: FILEY_URL)
     print("FADB-LENGTHS.data created?")
 }
 createFileY()
 
 func compressionTest_Volumes() {
-    compTest = try! NSData(data: Data(BULK_VOLU)).compressed(using: .lzfse)
-    print(compTest.count - 12, BULK_VOLU.count)
-    compTest = try! NSData(data: Data(BULK_VOLU)).compressed(using: .lzma)
-    print(compTest.count - 32, BULK_VOLU.count)
+    compVOLU = try! NSData(data: Data(BULK_VOLU)).compressed(using: .lzfse)
+    print(compVOLU.count - 12, BULK_VOLU.count)
+    compVOLU = try! NSData(data: Data(BULK_VOLU)).compressed(using: .lzma) // .compressed(using: .lzma)
+    print(compVOLU.count - 32, BULK_VOLU.count)
 }
 compressionTest_Volumes()
 
 let FILEZ_URL = URL(fileURLWithPath: "/Users/sdb/TESTING/NEW/FADB-VOLUMES.data")
-func createFileZ() {
-    let data = compTest
-    try! Data(data).write(to: FILEZ_URL)
+func createFileZ() throws {
+    let data = Data(compVOLU)
+    try Data(data).write(to: FILEZ_URL)
     print("FADB-VOLUMES.data created?")
 }
-createFileZ()
+try createFileZ()
 
 print("\(-date_start.timeIntervalSinceNow) seconds.")
 print()
